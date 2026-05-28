@@ -504,6 +504,72 @@ def render_methodology(out_dir: str, data: dict) -> str:
     return path
 
 
+def render_monthly_diff(out_dir: str, diff: dict) -> str:
+    path = os.path.join(out_dir, "04-monthly-diff.md")
+    L: list[str] = []
+    L.append("# 월별 변화")
+    L.append("")
+    prev_date = diff.get("previous_date") or "-"
+    L.append(f"{_ts()} · 비교 기준: {prev_date} 실행")
+    L.append("")
+
+    cost = diff.get("cost") or {}
+    if cost.get("current") is not None and cost.get("previous") is not None:
+        L.append("## 비용 (직전 완료 월)")
+        L.append("")
+        delta = cost.get("delta_usd")
+        pct = cost.get("delta_pct")
+        L.append(f"- 이전: ${cost['previous']:,.2f}")
+        L.append(f"- 현재: ${cost['current']:,.2f}")
+        if delta is not None:
+            sign = "+" if delta >= 0 else "-"
+            pct_str = f" ({sign}{abs(pct):.1f}%)" if pct is not None else ""
+            L.append(f"- 차이: {sign}${abs(delta):,.2f}{pct_str}")
+        L.append("")
+
+    sections: list[tuple[str, str, dict, bool]] = [
+        ("Idle EC2 (30일 avg CPU < 5%)", "instance id", diff.get("ec2_idle") or {}, True),
+        ("Zero-traffic ALB", "ALB name", diff.get("albs_zero_traffic") or {}, True),
+        ("Zero-traffic NAT Gateway", "NAT id", diff.get("nats_zero_traffic") or {}, True),
+        ("Idle RDS", "RDS id", diff.get("rds_idle") or {}, True),
+        ("미사용 (AMI 미종속) 스냅샷", "snapshot id", diff.get("free_snapshots") or {}, False),
+    ]
+
+    def _bullets(items: list[str], cap: int = 20) -> None:
+        for x in items[:cap]:
+            L.append(f"- `{x}`")
+        if len(items) > cap:
+            L.append(f"- 외 {len(items) - cap}개")
+
+    for title, _label, d, include_persisted in sections:
+        L.append(f"## {title}")
+        L.append("")
+        new = d.get("newly_flagged") or []
+        res = d.get("resolved") or []
+        per = d.get("persisted") or []
+        if not new and not res and (not include_persisted or not per):
+            L.append("변화 없음.")
+            L.append("")
+            continue
+        if new:
+            L.append(f"**신규 ({len(new)})** — 이번 달에 새로 발견:")
+            L.append("")
+            _bullets(new)
+            L.append("")
+        if res:
+            L.append(f"**해결됨 ({len(res)})** — 지난 달 발견되었으나 이번 달 없음:")
+            L.append("")
+            _bullets(res)
+            L.append("")
+        if include_persisted and per:
+            L.append(f"**지속 ({len(per)})** — 두 달 모두 발견. 액션이 누적되고 있음. 자세한 내용은 `02-problems.md` 참조.")
+            L.append("")
+
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(L))
+    return path
+
+
 def render_all(out_dir: str, data: dict) -> dict:
     """Render all reports + CSVs. Returns dict of paths."""
     paths = {
@@ -512,6 +578,8 @@ def render_all(out_dir: str, data: dict) -> dict:
         "improvements": render_improvements(out_dir, data),
         "methodology": render_methodology(out_dir, data),
     }
+    if data.get("monthly_diff"):
+        paths["monthly_diff"] = render_monthly_diff(out_dir, data["monthly_diff"])
 
     csv_dir = os.path.join(out_dir, "data")
     write_csv(f"{csv_dir}/ec2_idle.csv",

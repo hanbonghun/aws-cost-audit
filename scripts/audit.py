@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-from lib import collect, analyze, report, notify  # noqa: E402
+from lib import collect, analyze, report, notify, diff  # noqa: E402
 
 logging.basicConfig(
     level=os.environ.get("LOG_LEVEL", "INFO"),
@@ -164,12 +164,27 @@ def main() -> int:
         "duration_seconds": (datetime.now(timezone.utc) - start).total_seconds(),
     }
 
+    bucket = os.environ.get("S3_REPORT_BUCKET")
+    if bucket:
+        prev = diff.find_previous_run(bucket, today)
+        if prev:
+            prev_date, prev_key = prev
+            prev_summary = diff.load_previous_summary(bucket, prev_key)
+            if prev_summary:
+                data["monthly_diff"] = diff.compute_diff(data, prev_summary)
+                log.info("Monthly diff vs %s computed", prev_date)
+            else:
+                log.info("Previous summary %s not loadable; skipping diff", prev_key)
+        else:
+            log.info("No prior run found in s3://%s; skipping diff", bucket)
+    else:
+        log.info("S3_REPORT_BUCKET not set; skipping diff")
+
     log.info("Rendering reports ...")
     paths = report.render_all(out_dir, data)
     log.info("Reports written to %s", out_dir)
 
     # ── Upload + notify ──────────────────────────────────────────────
-    bucket = os.environ.get("S3_REPORT_BUCKET")
     if bucket:
         s3_prefix = today
         s3_uri = notify.upload_to_s3(out_dir, bucket, s3_prefix)
