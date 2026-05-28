@@ -4,6 +4,8 @@ Monthly AWS cost audit, run as a GitHub Actions cron. OIDC-only authentication. 
 
 The workflow assumes a read-only IAM role via OIDC, runs 17 investigations covering idle resources, rightsizing, cost trends, Savings Plans coverage, snapshot dependencies, and tag hygiene, then writes Markdown and CSV reports to S3 with a summary delivered via SNS and Slack. The role grants no write, modify, or delete permissions on audited resources — verifiable via CloudTrail.
 
+> **Privacy note**: reports contain resource IDs, ARNs, tag values, and account numbers. Keep the report S3 bucket private (the bundled Terraform does this by default) and never commit the local `audit-output/` directory.
+
 ## Quick start (5 minutes)
 
 Prerequisites: an AWS account with admin credentials for the one-time Terraform apply, Terraform 1.5+, and AWS CLI.
@@ -39,6 +41,8 @@ MIT. See [`LICENSE`](LICENSE).
 매월 1일 AWS 비용을 자동으로 분석하고, S3에 리포트를 저장하고 Slack/Email로 요약을 발송하는 GitOps 기반 비용 감사 시스템.
 
 **Read-only** — AWS 리소스에 어떤 변경도 가하지 않습니다. 분석 결과를 보고할 뿐.
+
+> **프라이버시 안내**: 리포트에는 리소스 ID, ARN, 태그 값, 계정 번호가 포함됩니다. 리포트용 S3 버킷은 private 으로 유지해 주세요 (Terraform 기본값). 로컬에 생성되는 `audit-output/` 디렉터리도 커밋하지 마세요.
 
 ### 무엇을 분석하는가
 
