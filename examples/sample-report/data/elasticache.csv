@@ -1,0 +1,8 @@
+Region,Id,Type,Engine,NumNodes,CPU_avg,Conn_avg,Mem_avg_pct,Verdict
+ap-northeast-2,dev-app-1-cache-001,cache.t3.small,valkey,1,2.05,30.8,0.74,OK
+ap-northeast-2,dev-app-2-cache-001,cache.t4g.micro,valkey,1,2.28,5.5,1.7,OK
+ap-northeast-2,prod-app-1-cache-001,cache.t3.small,valkey,1,2.09,56.6,0.76,OK
+ap-northeast-2,shared-app-1-cache-001,cache.t3.small,valkey,1,2.25,5.5,1.07,OK
+ap-northeast-2,stag-app-1-cache-001,cache.t4g.micro,valkey,1,2.43,5.5,2.65,OK
+ap-northeast-2,stag-app-2-cache-001,cache.t3.small,valkey,1,2.16,56.8,0.75,OK
+ap-northeast-2,stag-app-3-cache-001,cache.t4g.micro,valkey,1,2.34,6.3,1.7,OK

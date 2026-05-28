@@ -1,0 +1,23 @@
+Region,Id,Type,Name,AvgCPU,MaxCPU,NetIn30dGiB,NetOut30dGiB,Verdict,Rationale
+ap-northeast-2,i-00000000000000003,t3.small,shared-app-1,0.36438805964427684,39.08333333333333,0.447,0.273,REVIEW,"avg 0.36%, max 39.08%, net 0.72 GiB"
+ap-northeast-2,i-00000000000000014,t2.medium,shared-app-2,3.219544333332775,40.63,0.379,0.053,REVIEW,"avg 3.22%, max 40.63%, net 0.43 GiB"
+ap-northeast-2,i-0000000000000000f,t3.large,dev-app-1,1.2769153595144183,17.320784941930317,0.205,0.085,DOWNSIZE,"low usage (avg 1.28%, max 17.32%) — downsize 1-2 sizes"
+ap-northeast-2,i-0000000000000000b,t2.micro,shared-bastion-1,1.1575437002235882,42.5,21.215,20.18,KEEP-BASTION,Bastion/jump host (low CPU normal); consider t4g.nano (~$3.80/mo)
+ap-northeast-2,i-0000000000000000c,t3.xlarge,prod-app-1,1.191372524453909,92.50766564458073,7.198,12.609,REVIEW,"avg 1.19%, max 92.51%, net 19.81 GiB"
+ap-northeast-2,i-00000000000000007,t3.xlarge,prod-app-1,0.9902948164567226,38.90333333333333,9.008,14.24,REVIEW,"avg 0.99%, max 38.90%, net 23.25 GiB"
+ap-northeast-2,i-0000000000000000e,t3.xlarge,stag-app-1,1.2313410053719003,95.54437297963808,7.646,17.796,REVIEW,"avg 1.23%, max 95.54%, net 25.44 GiB"
+ap-northeast-2,i-00000000000000001,t3.micro,shared-bastion-2,0.15810256178525597,6.616666666666666,0.011,0.007,KEEP-BASTION,Bastion/jump host (low CPU normal); consider t4g.nano (~$3.80/mo)
+ap-northeast-2,i-00000000000000012,t3.xlarge,dev-app-2,1.7077418829359765,68.72229074302477,44.532,21.596,REVIEW,"avg 1.71%, max 68.72%, net 66.13 GiB"
+ap-northeast-2,i-00000000000000009,t3.xlarge,stag-app-1,1.0520701652047624,64.61899686937987,7.584,14.936,REVIEW,"avg 1.05%, max 64.62%, net 22.52 GiB"
+ap-northeast-2,i-00000000000000016,r7i.2xlarge,shared-bi-1,3.585547033425686,25.06333333333333,2.135,3.217,REVIEW,"avg 3.59%, max 25.06%, net 5.35 GiB"
+ap-northeast-2,i-00000000000000011,t3.large,dev-ci-1,1.59123030199816,95.78742060779835,19.288,42.205,REVIEW,"avg 1.59%, max 95.79%, net 61.49 GiB"
+ap-northeast-2,i-00000000000000004,t4g.medium,shared-bi-2,0.5463999161251004,1.9990671020190576,0.691,1.516,DOWNSIZE,"low usage (avg 0.55%, max 2.00%) — downsize 1-2 sizes"
+ap-northeast-2,i-00000000000000008,t3.medium,shared-app-8,0.9979042674080802,71.43094427373141,3.402,2.764,REVIEW,"avg 1.00%, max 71.43%, net 6.17 GiB"
+ap-northeast-2,i-00000000000000015,t3.medium,stag-obs-1,3.320879416827759,56.58144728509049,12.022,12.137,REVIEW,"avg 3.32%, max 56.58%, net 24.16 GiB"
+ap-northeast-2,i-00000000000000013,t3.large,dev-obs-1,3.1062456089010726,55.701856728557615,6.554,12.939,REVIEW,"avg 3.11%, max 55.70%, net 19.49 GiB"
+ap-northeast-2,i-0000000000000000a,t3.medium,dev-app-5,1.0642704427429843,95.56240113229539,3.262,23.147,REVIEW,"avg 1.06%, max 95.56%, net 26.41 GiB"
+ap-northeast-2,i-00000000000000006,t3.small,stag-app-4,0.6478902092743724,14.375958397226482,0.06,0.133,DOWNSIZE,"low usage (avg 0.65%, max 14.38%) — downsize 1-2 sizes"
+ap-northeast-2,i-0000000000000000d,t3.small,dev-app-6,1.2233557480963695,56.2026160126635,0.511,0.323,REVIEW,"avg 1.22%, max 56.20%, net 0.83 GiB"
+ap-northeast-2,i-00000000000000002,t4g.nano,stag-app-6,0.26603956731668765,25.382319096776346,0.171,0.101,REVIEW,"avg 0.27%, max 25.38%, net 0.27 GiB"
+ap-northeast-2,i-00000000000000005,t3.large,prod-app-3,0.5867855635523811,90.71258074746699,0.959,1.336,REVIEW,"avg 0.59%, max 90.71%, net 2.29 GiB"
+ap-northeast-2,i-00000000000000010,t3.small,stag-app-4,1.5531307600298851,79.06666666666666,0.554,0.481,REVIEW,"avg 1.55%, max 79.07%, net 1.04 GiB"

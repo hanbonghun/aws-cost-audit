@@ -1,0 +1,12 @@
+Region,Id,Class,Engine,MultiAZ,Storage,CPU_avg,Conn_avg,MonthlyUSD_approx,Verdict
+ap-northeast-2,shared-app-14,db.t4g.micro,mysql,False,20,3.23,0.0,17.36,DOWNSIZE
+ap-northeast-2,dev-app-1-postgres,db.t4g.micro,postgres,False,20,3.4,4.32,16.9,DOWNSIZE
+ap-northeast-2,dev-app-2-postgres,db.t4g.micro,postgres,False,20,4.19,9.9,16.9,DOWNSIZE
+ap-northeast-2,dev-app-3-postgres,db.t4g.micro,postgres,False,20,3.26,8.56,16.9,DOWNSIZE
+ap-northeast-2,shared-app-1-postgres,db.t4g.micro,postgres,False,50,3.35,0.23,21.5,IDLE
+ap-northeast-2,prod-app-1-postgres,db.r6g.large,postgres,True,100,3.2,22.01,481.44,OK
+ap-northeast-2,prod-app-2-postgres,db.t4g.medium,postgres,False,100,4.5,9.82,69.9,DOWNSIZE
+ap-northeast-2,shared-app-2-postgres,db.t4g.micro,postgres,False,20,3.4,10.11,16.9,DOWNSIZE
+ap-northeast-2,stag-app-1-postgres,db.t4g.micro,postgres,False,50,4.33,10.35,20.35,DOWNSIZE
+ap-northeast-2,stag-app-2-postgres,db.t4g.micro,postgres,False,20,3.22,20.12,16.9,DOWNSIZE
+ap-northeast-2,stag-app-3-postgres,db.t4g.small,postgres,False,30,3.65,19.8,32.65,DOWNSIZE

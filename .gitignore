@@ -41,3 +41,6 @@ audit-output/
 # Agent / assistant workspace
 .claude/
 .codex/
+
+# Scrub config — keep company-distinctive terms out of the public repo
+.scrub-extra

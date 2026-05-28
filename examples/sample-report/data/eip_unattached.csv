@@ -1,0 +1,4 @@
+Region,PublicIp,AllocationId,Domain
+ap-northeast-2,192.0.2.1,eipalloc-00000000000000001,vpc
+ap-northeast-2,192.0.2.1,eipalloc-00000000000000002,vpc
+ap-northeast-2,192.0.2.1,eipalloc-00000000000000003,vpc

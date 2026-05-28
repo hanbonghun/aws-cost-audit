@@ -1,0 +1,15 @@
+Region,SnapshotId,Size,Started,BoundAMIs
+ap-northeast-2,snap-00000000000000007,50,2025-10-03T10:44:38.954000+00:00,"[{'AMI': 'ami-00000000000000001', 'Name': 'dev-cm-grafana-2510031943', 'State': 'available'}]"
+ap-northeast-2,snap-00000000000000008,50,2025-07-07T00:41:37.804000+00:00,"[{'AMI': 'ami-00000000000000002', 'Name': 'dev-cm-service-ami', 'State': 'available'}]"
+ap-northeast-2,snap-00000000000000009,8,2025-04-15T09:47:39.973000+00:00,"[{'AMI': 'ami-00000000000000003', 'Name': 'cm-dev-service-ami', 'State': 'available'}]"
+ap-northeast-2,snap-0000000000000000a,30,2026-02-12T03:27:33.583000+00:00,"[{'AMI': 'ami-00000000000000004', 'Name': 'prod-cm-temp-ami', 'State': 'available'}]"
+ap-northeast-2,snap-00000000000000001,30,2026-02-12T03:19:36.061000+00:00,[]
+ap-northeast-2,snap-00000000000000002,30,2026-02-12T02:56:01.797000+00:00,[]
+ap-northeast-2,snap-00000000000000003,30,2026-02-12T03:13:51.132000+00:00,[]
+ap-northeast-2,snap-00000000000000004,30,2026-02-12T02:53:18.864000+00:00,[]
+ap-northeast-2,snap-00000000000000005,30,2025-10-16T06:06:35.340000+00:00,[]
+ap-northeast-2,snap-0000000000000000b,100,2025-10-03T09:18:33.151000+00:00,"[{'AMI': 'ami-00000000000000005', 'Name': 'dev-ci-1-2510031816', 'State': 'available'}]"
+ap-northeast-2,snap-0000000000000000c,100,2025-07-07T00:42:05.472000+00:00,"[{'AMI': 'ami-00000000000000006', 'Name': 'dev-ci-1-ami', 'State': 'available'}]"
+ap-northeast-2,snap-00000000000000006,100,2025-04-18T16:45:12.639000+00:00,[]
+ap-northeast-2,snap-0000000000000000d,50,2025-06-24T00:22:08.213000+00:00,"[{'AMI': 'ami-00000000000000007', 'Name': 'stag-cm-grafana', 'State': 'available'}]"
+ap-northeast-2,snap-0000000000000000e,30,2025-06-11T00:09:59.722000+00:00,"[{'AMI': 'ami-00000000000000008', 'Name': 'dev-app-1-ami', 'State': 'available'}]"
