@@ -1,10 +1,46 @@
 # aws-cost-audit
 
+Monthly AWS cost audit, run as a GitHub Actions cron. OIDC-only authentication. ~$0.30/month operational cost. No agents, no SaaS, no long-lived keys.
+
+The workflow assumes a read-only IAM role via OIDC, runs 17 investigations covering idle resources, rightsizing, cost trends, Savings Plans coverage, snapshot dependencies, and tag hygiene, then writes Markdown and CSV reports to S3 with a summary delivered via SNS and Slack. The role grants no write, modify, or delete permissions on audited resources — verifiable via CloudTrail.
+
+## Quick start (5 minutes)
+
+Prerequisites: an AWS account with admin credentials for the one-time Terraform apply, Terraform 1.5+, and AWS CLI.
+
+```bash
+git clone https://github.com/your-org/aws-cost-audit.git
+cd aws-cost-audit/terraform
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars: github_org, github_repo, notification_emails
+terraform init && terraform apply
+```
+
+Register the three Terraform outputs as GitHub repository secrets:
+
+| Terraform output | GitHub secret |
+|---|---|
+| `iam_role_arn` | `AWS_ROLE_ARN` |
+| `s3_bucket_name` | `S3_REPORT_BUCKET` |
+| `sns_topic_arn` | `SNS_TOPIC_ARN` |
+
+Then trigger the first audit manually: **Actions → On-Demand Audit → Run workflow**. The report lands in S3 within ~10 minutes. The monthly cron takes over on the 1st of every month at 00:00 UTC.
+
+For Slack webhook setup, OIDC provider import conflicts, and troubleshooting, see [`docs/SETUP.md`](docs/SETUP.md). For architecture and security details, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+## License
+
+MIT. See [`LICENSE`](LICENSE).
+
+---
+
+## 한국어 안내
+
 매월 1일 AWS 비용을 자동으로 분석하고, S3에 리포트를 저장하고 Slack/Email로 요약을 발송하는 GitOps 기반 비용 감사 시스템.
 
 **Read-only** — AWS 리소스에 어떤 변경도 가하지 않습니다. 분석 결과를 보고할 뿐.
 
-## 무엇을 분석하는가
+### 무엇을 분석하는가
 
 17개 카테고리에 걸친 비용 최적화 기회 자동 탐지:
 
@@ -28,7 +64,7 @@
 | 16 | Tagging governance | Owner/Project/Environment 누락 비율 |
 | 17 | Orphaned 자원 | ENI/SG/AMI/TG/ASG/stopped-EC2 |
 
-## 아키텍처
+### 아키텍처
 
 ```
 GitHub Actions (cron: 매월 1일 00:00 UTC = 09:00 KST)
@@ -46,9 +82,9 @@ AWS IAM role: aws-cost-audit-reader
 
 **왜 GitHub Actions인가**: Lambda 15분 timeout 제약 없음, 기존 bash+python 스크립트 그대로 재사용, 디버깅 쉬움, 무료 (월 2000분 한도 내).
 
-## 빠른 시작
+### 빠른 시작
 
-### 1. Terraform 변수 설정
+#### 1. Terraform 변수 설정
 
 ```bash
 cd terraform
@@ -56,7 +92,7 @@ cp terraform.tfvars.example terraform.tfvars
 # terraform.tfvars 편집 — github_repo, email, slack_webhook 등
 ```
 
-### 2. AWS 인프라 배포 (1회)
+#### 2. AWS 인프라 배포 (1회)
 
 ```bash
 terraform init
@@ -72,7 +108,7 @@ terraform apply
 - (옵션) AWS Budgets monthly $5,000 알람
 - (옵션) Cost Anomaly Detection monitor
 
-### 3. GitHub Secrets 등록
+#### 3. GitHub Secrets 등록
 
 Terraform output 으로 출력된 값을 repo Settings → Secrets에 등록:
 
@@ -83,7 +119,7 @@ Terraform output 으로 출력된 값을 repo Settings → Secrets에 등록:
 | `SNS_TOPIC_ARN` | Terraform output `sns_topic_arn` |
 | `SLACK_WEBHOOK_URL` | (옵션) Slack incoming webhook URL |
 
-### 4. 동작 확인
+#### 4. 동작 확인
 
 수동 실행 (workflow_dispatch):
 
@@ -93,7 +129,7 @@ Actions → Monthly Cost Audit → Run workflow
 
 또는 매월 1일 자동 실행 대기.
 
-## 산출물
+### 산출물
 
 각 실행마다 S3에 다음 파일들이 업로드됩니다:
 
@@ -111,7 +147,7 @@ s3://aws-cost-audit-reports-{account}/
         └── master_summary.json
 ```
 
-## 안전장치
+### 안전장치
 
 이 도구는 **READ-ONLY** 입니다. 다음과 같이 강제됩니다:
 
@@ -121,7 +157,7 @@ s3://aws-cost-audit-reports-{account}/
 
 자세한 권한 명세는 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) 참고.
 
-## 비용
+### 비용
 
 거의 0:
 
@@ -135,7 +171,7 @@ s3://aws-cost-audit-reports-{account}/
 | CloudWatch GetMetricData | <$0.20 |
 | **합계** | **~$0.30/월** |
 
-## 폴더 구조
+### 폴더 구조
 
 ```
 .
@@ -172,7 +208,7 @@ s3://aws-cost-audit-reports-{account}/
     └── ROADMAP.md
 ```
 
-## 로드맵
+### 로드맵
 
 - [x] 17개 investigation 수집기
 - [x] Markdown + CSV 리포트 생성
@@ -182,7 +218,3 @@ s3://aws-cost-audit-reports-{account}/
 - [ ] GitHub Issue 자동 생성 (Phase 1 액션을 트래킹 가능한 형태로)
 - [ ] CloudWatch Dashboard 자동 export
 - [ ] Multi-account 지원 (AWS Organizations)
-
-## License
-
-MIT
