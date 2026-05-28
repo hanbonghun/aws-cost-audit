@@ -37,3 +37,7 @@ audit-output/
 .idea/
 *.swp
 .DS_Store
+
+# Agent / assistant workspace
+.claude/
+.codex/
