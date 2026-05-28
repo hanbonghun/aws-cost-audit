@@ -6,9 +6,36 @@ The workflow assumes a read-only IAM role via OIDC, runs 17 investigations cover
 
 > **Privacy note**: reports contain resource IDs, ARNs, tag values, and account numbers. Keep the report S3 bucket private (the bundled Terraform does this by default) and never commit the local `audit-output/` directory.
 
-## Quick start (5 minutes)
+## Quick start
 
-Prerequisites: an AWS account with admin credentials for the one-time Terraform apply, Terraform 1.5+, and AWS CLI.
+Two ways to start, depending on your goal.
+
+### Track A — Try it locally (5 minutes, no AWS resources created)
+
+Just want to see what the report looks like for your account? Run the script against your existing read-only AWS profile. Nothing is created in your account — reports land in `./audit-output/`.
+
+Prerequisites: Python 3.11+, AWS credentials with read access (see [Required permissions](#required-permissions) below).
+
+```bash
+git clone https://github.com/your-org/aws-cost-audit.git
+cd aws-cost-audit
+python -m pip install -r scripts/requirements.txt
+
+export AWS_PROFILE=your-readonly-profile   # or AWS_ACCESS_KEY_ID / SECRET / SESSION_TOKEN
+export AWS_REGION=ap-northeast-2
+
+python scripts/audit.py
+```
+
+Output lands in `./audit-output/YYYY-MM-DD/`. Open `01-cost-report.md` first.
+
+Missing permissions degrade gracefully — API calls that fail with `AccessDenied` log a warning and the corresponding section of the report is empty.
+
+### Track B — Production deployment (monthly cron, ~30 minutes)
+
+For ongoing monthly automation: bundled Terraform creates an IAM role assumed by GitHub Actions via OIDC, an S3 bucket for report archival, an SNS topic for email summary, and (optional) Slack webhook delivery. ~$0.30/month operational cost.
+
+Prerequisites: above + Terraform 1.5+ + AWS admin credentials for the one-time `terraform apply`.
 
 ```bash
 git clone https://github.com/your-org/aws-cost-audit.git
@@ -29,6 +56,20 @@ Register the three Terraform outputs as GitHub repository secrets:
 Then trigger the first audit manually: **Actions → On-Demand Audit → Run workflow**. The report lands in S3 within ~10 minutes. The monthly cron takes over on the 1st of every month at 00:00 UTC.
 
 For Slack webhook setup, OIDC provider import conflicts, and troubleshooting, see [`docs/SETUP.md`](docs/SETUP.md). For architecture details, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). For the IAM policy, the full list of AWS APIs called, and how to verify read-only safety yourself, see [`docs/SECURITY.md`](docs/SECURITY.md).
+
+### Required permissions
+
+For **Track A** (local run), attach these AWS-managed policies to the IAM user or role you authenticate as:
+
+| Policy | Covers |
+|---|---|
+| `arn:aws:iam::aws:policy/ReadOnlyAccess` | EC2 / RDS / Lambda / S3 / Route 53 / CloudFront / CloudWatch metrics + logs / Auto Scaling / ELB |
+| `arn:aws:iam::aws:policy/AWSBillingReadOnlyAccess` | Cost Explorer monthly trend + service breakdown |
+| `arn:aws:iam::aws:policy/ComputeOptimizerReadOnlyAccess` | EC2 / EBS / Lambda / ASG right-sizing recommendations |
+
+You can run with only `ReadOnlyAccess` — the cost-trend and right-sizing sections will be empty but the rest of the report still works.
+
+For **Track B** (production), the bundled Terraform attaches these for you, scoped to a single IAM role that only GitHub Actions in your specific repository can assume. You don't need to attach anything manually. See [`docs/SECURITY.md`](docs/SECURITY.md) for the full policy and the inline `ce:Get*` actions used.
 
 ## License
 
@@ -88,33 +129,49 @@ AWS IAM role: aws-cost-audit-reader
 
 ### 빠른 시작
 
-#### 1. Terraform 변수 설정
+목적에 따라 두 트랙 중 선택.
+
+#### Track A — 로컬에서 한 번 돌려보기 (5분, AWS 리소스 생성 없음)
+
+내 계정에서 어떤 리포트가 나오는지 평가만 해보고 싶다면, 본인의 read-only AWS profile 로 스크립트를 직접 실행합니다. 계정에 아무것도 만들어지지 않고 리포트는 `./audit-output/` 에 떨어집니다.
+
+준비물: Python 3.11+, read 권한이 있는 AWS 자격증명 ([필요 권한](#필요-권한) 참고).
+
+```bash
+git clone https://github.com/your-org/aws-cost-audit.git
+cd aws-cost-audit
+python -m pip install -r scripts/requirements.txt
+
+export AWS_PROFILE=your-readonly-profile   # 또는 AWS_ACCESS_KEY_ID / SECRET / SESSION_TOKEN
+export AWS_REGION=ap-northeast-2
+
+python scripts/audit.py
+```
+
+`./audit-output/YYYY-MM-DD/01-cost-report.md` 부터 확인. 일부 API 권한이 없으면 해당 섹션만 비어 있고 나머지는 정상 출력됩니다 (`AccessDenied` 는 warning 로그 후 skip).
+
+#### Track B — 운영 자동화 (월 1회 cron, 약 30분)
+
+매월 자동 실행 + S3 보관 + SNS/Slack 발송이 필요하다면 번들된 Terraform 으로 IAM role / S3 bucket / SNS topic 을 한 번에 만들고 GitHub Actions OIDC 로 연결합니다. 월 운영 비용 약 $0.30.
+
+준비물: 위 + Terraform 1.5+ + Terraform apply 용 admin 자격증명 (1회만).
 
 ```bash
 cd terraform
 cp terraform.tfvars.example terraform.tfvars
-# terraform.tfvars 편집 — github_repo, email, slack_webhook 등
-```
-
-#### 2. AWS 인프라 배포 (1회)
-
-```bash
-terraform init
-terraform plan
-terraform apply
+# terraform.tfvars 편집 — github_org, github_repo, notification_emails 등
+terraform init && terraform apply
 ```
 
 생성되는 자원:
 - S3 bucket: `aws-cost-audit-reports-{account_id}` (versioning, lifecycle 12개월)
 - IAM OIDC provider for GitHub
-- IAM role: `aws-cost-audit-reader` (GitHub repo만 assume 가능)
+- IAM role: `aws-cost-audit-reader` (특정 GitHub repo 만 assume 가능)
 - SNS topic + email subscription
 - (옵션) AWS Budgets monthly $5,000 알람
 - (옵션) Cost Anomaly Detection monitor
 
-#### 3. GitHub Secrets 등록
-
-Terraform output 으로 출력된 값을 repo Settings → Secrets에 등록:
+Terraform output 값을 repo Settings → Secrets 에 등록:
 
 | Secret | 값 |
 |---|---|
@@ -123,15 +180,21 @@ Terraform output 으로 출력된 값을 repo Settings → Secrets에 등록:
 | `SNS_TOPIC_ARN` | Terraform output `sns_topic_arn` |
 | `SLACK_WEBHOOK_URL` | (옵션) Slack incoming webhook URL |
 
-#### 4. 동작 확인
+수동 실행: **Actions → On-Demand Audit → Run workflow**. 또는 매월 1일 09:00 KST 자동 실행 대기.
 
-수동 실행 (workflow_dispatch):
+#### 필요 권한
 
-```
-Actions → Monthly Cost Audit → Run workflow
-```
+**Track A** (로컬 실행) 의 경우, 인증에 쓰이는 IAM user / role 에 다음 managed policy 들을 attach:
 
-또는 매월 1일 자동 실행 대기.
+| Policy | 커버 범위 |
+|---|---|
+| `arn:aws:iam::aws:policy/ReadOnlyAccess` | EC2 / RDS / Lambda / S3 / Route 53 / CloudFront / CloudWatch / ELB |
+| `arn:aws:iam::aws:policy/AWSBillingReadOnlyAccess` | Cost Explorer 월별 추이 + 서비스별 분해 |
+| `arn:aws:iam::aws:policy/ComputeOptimizerReadOnlyAccess` | EC2 / EBS / Lambda / ASG rightsizing 추천 |
+
+`ReadOnlyAccess` 만 있어도 동작합니다. Cost / rightsizing 섹션이 빈 채로 출력될 뿐.
+
+**Track B** (운영) 는 Terraform 이 위 권한을 가진 IAM role 을 자동으로 만들고, 본인 GitHub repo 에서만 OIDC 로 assume 할 수 있게 trust policy 를 묶어줍니다. 별도 attach 불필요. 전체 권한 명세는 [`docs/SECURITY.md`](docs/SECURITY.md) 참고.
 
 ### 산출물
 
