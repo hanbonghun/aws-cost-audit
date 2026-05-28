@@ -1,0 +1,39 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform.lock.hcl
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Local run artifacts
+audit-output/
+*.local.json
+*.local.csv
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store

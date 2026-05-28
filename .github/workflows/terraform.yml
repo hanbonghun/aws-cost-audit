@@ -1,0 +1,50 @@
+name: Terraform Plan
+
+on:
+  pull_request:
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.0"
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: gh-actions-tf-${{ github.run_id }}
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform init
+        run: terraform init -backend=false
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: terraform plan -no-color || true
+        env:
+          TF_VAR_github_org: ${{ github.repository_owner }}
+          TF_VAR_github_repo: ${{ github.event.repository.name }}

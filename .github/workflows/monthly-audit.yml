@@ -1,0 +1,70 @@
+name: Monthly Cost Audit
+
+on:
+  schedule:
+    # 매월 1일 00:00 UTC = 09:00 KST
+    - cron: "0 0 1 * *"
+  workflow_dispatch:
+    inputs:
+      enable_s3_lifecycle:
+        description: "S3 lifecycle/versioning 점검 포함 (느림, 100+ 버킷 환경에서)"
+        required: false
+        default: "true"
+
+permissions:
+  id-token: write   # OIDC AssumeRole
+  contents: read
+
+jobs:
+  audit:
+    name: Run cost audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: gh-actions-cost-audit-${{ github.run_id }}
+
+      - name: Verify identity (read-only check)
+        run: |
+          IDENTITY=$(aws sts get-caller-identity --output json)
+          echo "$IDENTITY"
+          ARN=$(echo "$IDENTITY" | python -c "import json,sys;print(json.load(sys.stdin)['Arn'])")
+          case "$ARN" in
+            *readonly*|*audit*|*Reader*|*reader*) echo "OK: read-only identity" ;;
+            *) echo "❌ ARN does not look read-only: $ARN" && exit 1 ;;
+          esac
+
+      - name: Run audit
+        env:
+          S3_REPORT_BUCKET: ${{ secrets.S3_REPORT_BUCKET }}
+          SNS_TOPIC_ARN: ${{ secrets.SNS_TOPIC_ARN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ENABLE_S3_LIFECYCLE: ${{ inputs.enable_s3_lifecycle || 'true' }}
+        run: python scripts/audit.py
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cost-audit-${{ github.run_id }}
+          path: audit-output/
+          retention-days: 30

@@ -1,0 +1,20 @@
+# Required — GitHub repository details
+github_org    = "your-org"
+github_repo   = "aws-cost-audit"
+github_branch = "main"
+
+# Required — Notification emails (SNS subscription)
+notification_emails = [
+  "you@example.com",
+]
+
+# Optional
+region                        = "ap-northeast-2"
+name_prefix                   = "aws-cost-audit"
+report_retention_days         = 365
+
+enable_budget_alarm           = true
+monthly_budget_usd            = 5000
+
+enable_cost_anomaly_detection = true
+anomaly_threshold_usd         = 100
