@@ -82,17 +82,17 @@ def build_summary(data: dict, s3_uri: str) -> dict:
     sp_save = float(sp_rec.get("EstimatedMonthlySavingsAmount", 0) or 0)
 
     text_lines = [
-        f"📊 AWS Cost Audit — Account {data['account']}",
-        f"  • {last_period} 비용: ${last_cost:,.2f}",
-        f"  • Idle EC2: {len(idle)}/{len(ec2)}",
-        f"  • Zero-traffic ALB: {len(zero_albs)}개",
-        f"  • Zero-traffic NAT: {len(zero_nats)}개",
-        f"  • RDS IDLE: {len(rds_idle)}개",
-        f"  • 미사용 스냅샷: {len(free_snaps)}개",
+        f"AWS Cost Audit — Account {data['account']}",
+        f"  - {last_period} 비용: ${last_cost:,.2f}",
+        f"  - Idle EC2: {len(idle)}/{len(ec2)}",
+        f"  - Zero-traffic ALB: {len(zero_albs)}개",
+        f"  - Zero-traffic NAT: {len(zero_nats)}개",
+        f"  - RDS IDLE: {len(rds_idle)}개",
+        f"  - 미사용 스냅샷: {len(free_snaps)}개",
     ]
     if sp_save > 0:
-        text_lines.append(f"  • 💰 Compute SP 구매 추천 → ${sp_save}/mo 절감 가능")
-    text_lines.append(f"  • 📁 전체 리포트: {s3_uri}")
+        text_lines.append(f"  - Compute SP 구매 추천 → ${sp_save}/mo 절감 가능")
+    text_lines.append(f"  - 전체 리포트: {s3_uri}")
 
     return {
         "subject": f"AWS Cost Audit · ${last_cost:,.0f}/mo · {len(idle)} idle EC2",

@@ -28,7 +28,7 @@ Register the three Terraform outputs as GitHub repository secrets:
 
 Then trigger the first audit manually: **Actions → On-Demand Audit → Run workflow**. The report lands in S3 within ~10 minutes. The monthly cron takes over on the 1st of every month at 00:00 UTC.
 
-For Slack webhook setup, OIDC provider import conflicts, and troubleshooting, see [`docs/SETUP.md`](docs/SETUP.md). For architecture and security details, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+For Slack webhook setup, OIDC provider import conflicts, and troubleshooting, see [`docs/SETUP.md`](docs/SETUP.md). For architecture details, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). For the IAM policy, the full list of AWS APIs called, and how to verify read-only safety yourself, see [`docs/SECURITY.md`](docs/SECURITY.md).
 
 ## License
 
@@ -159,7 +159,7 @@ s3://aws-cost-audit-reports-{account}/
 2. 스크립트 내부에서도 모든 호출은 `describe-*`, `list-*`, `get-*` 만 사용
 3. CloudTrail 로 변경 이벤트 검증 가능
 
-자세한 권한 명세는 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) 참고.
+자세한 권한 명세 + 호출하는 AWS API 전체 목록 + CloudTrail 로 직접 검증하는 명령은 [`docs/SECURITY.md`](docs/SECURITY.md) 에 정리되어 있습니다. 아키텍처 다이어그램과 데이터 흐름은 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ### 비용
 
